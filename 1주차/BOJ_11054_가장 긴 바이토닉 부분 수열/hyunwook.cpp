@@ -1,3 +1,4 @@
+  
 #include <iostream>
 #include <cstring>
 using namespace std;
@@ -47,10 +48,7 @@ int main() {
 		if (dp[i] + dp_reverse[i] - 1 > result)
 			result = dp[i] + dp_reverse[i] - 1;
 		
-		if (dp[i] > result)
-			result = dp[i];
-		else if (dp_reverse[i] > result)
-			result = dp_reverse[i];
+	
 		
 	}
 	cout << result << endl;
