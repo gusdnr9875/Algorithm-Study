@@ -1,108 +1,90 @@
 #include <iostream>
 #include <vector>
-#include <cstring>
-#include <queue>
-#include <climits>
+#include <algorithm>
 
 using namespace std;
 
-int n,m; // 한 변의 길이 , 남겨진 치킨집 개수  
-int town[50][50];
-vector<pair<int,int> > chicken;
-vector<pair<int,int> > house;
-int selection[13][2]; // 폐점되지 않은 치킨집의 좌표  
-bool visit[50][50];
-int copytown[50][50];
-int ans = INT_MAX; 
+const int INF = 987654321;
+int n,m;
+int city[50][50];
+int visit[50][50]; 
+int chicken[13][2]; // 살아남은 치킨 집 
+int result = INF;
 
-typedef struct
+
+void dfs(int y, int cnt)
 {
-	int y, x;
-}dir;
-
-dir moveDir[4] = {{0,1},{1,0},{0,-1},{-1,0}};
-
-void cpyTown()
-{
-	for(int i=0;i<n;i++)
-		for(int j=0;j<n;j++)
-			copytown[i][j] = 0;
-			
-	for(int i=0;i<m;i++)
-	{
-		int y = selection[i][0];
-		int x = selection[i][1];
-		
-		copytown[y][x] = 2;
-	}
-	
-	for(int i=0;i<n;i++)
-		for(int j=0;j<n;j++)
-			if(town[i][j] != 2)
-				copytown[i][j] = town[i][j];
-	
-}
-
-
-void dfs(int idx, int cnt)
-{
+	// 선택된 치킨집 
 	if(cnt == m)
 	{
 		
-		int result = 0;
-		
-		for(int i=0;i<house.size();i++)
+		int temp = 0;
+		for(int i=0;i<n;i++)
 		{
-			int y = house[i].first;
-			int x = house[i].second;
-			
-			int dist = INT_MAX;
-			
-			for(int i=0;i<m;i++)
+			for(int j=0;j<n;j++)
 			{
-				int cy = selection[i][0];
-				int cx = selection[i][1];
-				
-				dist = min(dist, abs(cy - y) + abs(cx - x));
-			}			
-			result += dist;
+				if(city[i][j] == 1)
+				{
+					int dist = INF;
+					for(int k=0;k<cnt;k++)
+					{
+						int cy = chicken[k][0];
+						int cx = chicken[k][1];
+						
+						int tdist = abs(cy - i) + abs(cx -j);
+						
+						if(tdist < dist)
+							dist = tdist;
+					}	
+					
+					temp += dist;
+				}	
+					
+			}
 		}
 		
-		//cout << result <<"\n";
+		if(temp < result)
+			result = temp;
 		
-		ans = min(ans, result);	
-		
-		return;
+		return; 
 	}
 	
-	for(int i=idx+1;i<chicken.size();i++) // 중복이되지 않도록 idx + 1을 해준다.  
+	
+	
+	for(int i = y;i<n;i++)
 	{
-		selection[cnt][0] = chicken[i].first; // y값 
-		selection[cnt][1] = chicken[i].second; // x 값  
-		dfs(i,cnt+1);
+		for(int j=0;j<n;j++)
+		{
+			if(city[i][j] == 2 && !visit[i][j])
+			{
+				visit[i][j] = true;
+				chicken[cnt][0] = i;
+				chicken[cnt][1] = j;				
+				dfs(i, cnt+1);
+				visit[i][j] = false;
+			}
+		}
 	}
-	return;
+
 }
+
+
+
 
 int main(){
 	ios_base::sync_with_stdio(0);
 	cin.tie(0);
+	
 	cin >> n >> m;
 	
 	for(int i=0;i<n;i++)
-	{
 		for(int j=0;j<n;j++)
-		{
-			cin >> town[i][j];
-			if(town[i][j] == 1)
-				house.push_back(make_pair(i,j)); // 집의 위치 저장. 
+			cin >> city[i][j];
 			
-			if(town[i][j] == 2) 
-				chicken.push_back(make_pair(i,j)); // 치킨집의 위치 저장. 
-		} 	
-	}
 	
-	dfs(-1,0);
-	cout << ans <<"\n";
+	dfs(0,0);
+	
+	cout << result <<"\n";
+	
 	return 0;
 }
