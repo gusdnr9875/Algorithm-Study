@@ -1,57 +1,58 @@
 #include <iostream>
-#include <string>
-#include <algorithm>
+#include <vector>
+#include <cmath>
 using namespace std;
 
-int l, c;
-string arr;
-bool checked[17] = { 0, };
+typedef struct MyStruct
+{
+	int y;
+	int x;
+	bool checked;
+}val;
 
-void dfs(int cnt, int current) {
+int n = 0, m = 0, h = 0;
+int result = 0;
+int arr[10][10] = { 0, };
+val house;
+vector <val> mint;
 
-	if (cnt == l) {
-
-		int m=0, j=0;
-		for (int i = 0; i < arr.size(); i++) {
-			if (checked[i]) {
-				if (arr[i] == 'a' || arr[i] == 'e' || arr[i] == 'i' || arr[i] == 'o' || arr[i] == 'u')
-					m++;
-				else
-					j++;
-			}
-		}
-		if (m >= 1 && j >= 2) {
-			for (int i = 0; i < arr.size(); i++)
-				if (checked[i])
-					cout << arr[i];
-			cout << endl;
-		}
+void dfs(int y, int x,int cur, int cnt, int hp) {
+	if (cnt > result) {// 방문횟수가 더 많고
+		if (abs(y - house.y) + abs(x - house.x) <= hp)
+			result = cnt;
+	}
+	if (hp <= 0)
 		return;
+	for (int i = 0; i < mint.size(); i++) {
+		
+			int len = abs(mint[i].y - y) + abs(mint[i].x - x);
+			if (len <= hp && mint[i].checked == 0) {
+				mint[i].checked = 1;
+				dfs(mint[i].y, mint[i].x, i+1, cnt + 1, hp - len + h);
+				mint[i].checked = 0;
+			}
+			
 	}
 
-
-	for (int i = current; i < arr.size(); i++) {
-		if (checked[i] == 0) {
-			checked[i] = 1;
-			dfs(cnt + 1, i);
-			checked[i] = 0;
-		}
-	}
-	return;
 }
 
 int main() {
 	ios_base::sync_with_stdio(0);
 	cin.tie(0), cout.tie(0);
+	cin >> n >> m >> h;
 
-	cin >> l >> c;
-	for (int i = 0; i < c; i++) {
-		char temp;
-		cin >> temp;
-		arr += temp;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++){
+			int temp = 0;
+			cin >> temp;
+			if (temp == 1)
+				house.y = i, house.x = j;
+			else if (temp == 2)
+				mint.push_back({ i,j,0 });
+		}
 	}
-	sort(arr.begin(), arr.end());
-	//cout << arr << endl;
-	dfs(0, 0);
+	
+	dfs(house.y,house.x,0, 0, m);
+	cout << result  << endl;
 	return 0;
 }

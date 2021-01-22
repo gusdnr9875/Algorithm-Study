@@ -1,57 +1,46 @@
 #include <iostream>
-#include <string>
-#include <algorithm>
 using namespace std;
+int n, x, y;
+int arr[26] = { 0, };
+bool checked[25] = { 0, };
+int result = 0;
 
-int l, c;
-string arr;
-bool checked[17] = { 0, };
-
-void dfs(int cnt, int current) {
-
-	if (cnt == l) {
-
-		int m=0, j=0;
-		for (int i = 0; i < arr.size(); i++) {
-			if (checked[i]) {
-				if (arr[i] == 'a' || arr[i] == 'e' || arr[i] == 'i' || arr[i] == 'o' || arr[i] == 'u')
-					m++;
-				else
-					j++;
-			}
-		}
-		if (m >= 1 && j >= 2) {
-			for (int i = 0; i < arr.size(); i++)
-				if (checked[i])
-					cout << arr[i];
-			cout << endl;
-		}
+void dfs(int cur) {
+	if (cur == n*2) {
+		result++;
 		return;
 	}
+	if (arr[cur] == 0) {
 
-
-	for (int i = current; i < arr.size(); i++) {
-		if (checked[i] == 0) {
-			checked[i] = 1;
-			dfs(cnt + 1, i);
-			checked[i] = 0;
+		for (int i = 1; i <= n; i++) {
+			if (checked[i] == 0) {
+				if (cur + i + 1 <= 2 * n && !arr[cur+i+1]) {
+					checked[i] = 1;
+					arr[cur] = i;
+					arr[cur + i + 1] = i;
+					dfs(cur + 1);
+					checked[i] = 0;
+					arr[cur] = 0;
+					arr[cur + i + 1] = 0;
+				}
+			}
 		}
 	}
+	else
+		dfs(cur + 1);
 	return;
 }
 
 int main() {
 	ios_base::sync_with_stdio(0);
 	cin.tie(0), cout.tie(0);
-
-	cin >> l >> c;
-	for (int i = 0; i < c; i++) {
-		char temp;
-		cin >> temp;
-		arr += temp;
-	}
-	sort(arr.begin(), arr.end());
-	//cout << arr << endl;
-	dfs(0, 0);
+	
+	cin >> n >> x >> y;
+	
+	arr[y] = y - x - 1;
+	arr[x] = y - x - 1;
+	checked[y - x - 1] = 1;
+	dfs(1);
+	cout << result << endl;
 	return 0;
 }
