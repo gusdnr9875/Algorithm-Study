@@ -1,61 +1,52 @@
 #include <iostream>
-#include <algorithm>
-#include <string>
 #include <vector>
+#include <cstring>
 using namespace std;
 
-int k;
-vector <char> arr;
-vector <int> val;
-bool chk() {
+int n = 0;
+bool visited[10001] = { 0, };
+vector <pair<int, int>> arr[10001];
 
-	for (int i = 0; i < arr.size(); i++) {
-		if (arr[i] == '<') {
-			if (val[i] > val[i + 1])
-				return false;
-		}
-		else {
-			if (val[i] < val[i + 1])
-				return false;
+int result = 0;
+int destination = 0;
+
+void dfs(int cur, int len) {
+
+	if (result < len) {
+		result = len;
+		destination = cur;
+	}
+
+	for (int i = 0; i < arr[cur].size(); i++) {
+		if (visited[arr[cur][i].first] == 0) {
+			visited[arr[cur][i].first] = 1;
+			dfs(arr[cur][i].first, len + arr[cur][i].second);
 		}
 	}
-	return true;
+
+
 }
-
-
 int main() {
-
-	cin >> k;
-	for (int i = 0; i < k; i++) {
-		char temp;
-		cin >> temp;
-		arr.push_back(temp);
+	ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+	cin >> n;
+	for (int i = 0; i < n - 1; i++) {
+		int s, e, v;
+		cin >> s >> e >> v;
+		arr[s].push_back(make_pair(e, v));
+		arr[e].push_back(make_pair(s, v));
 	}
-	for (int j = 0, i = 9; j < k + 1; j++,i--) 
-		val.push_back(i);
-	while (1) {
-		if (chk() == true)
-			break;
-		prev_permutation(val.begin(), val.end());
-	}
-	for (int i = 0; i < val.size(); i++)
-		cout << val[i];
-	cout << endl;
 
-	val.clear();
-	for (int i = 0; i < k + 1; i++)
-		val.push_back(i);
+	visited[1] = 1;
+	dfs(1, 0); //목적지 구하고
+	
+	
+	memset(visited, 0, sizeof(visited));
+	result = 0;
+	
+	visited[destination] = 1;
+	dfs(destination, 0);
 
-	while (1) {
-		if (chk() == true)
-			break;
-
-		next_permutation(val.begin(), val.end());
-		
-	}
-	for (int i = 0; i < val.size(); i++)
-		cout << val[i];
-	cout << endl;
-	return 0;
+	cout << result << endl;
+	
 
 }
