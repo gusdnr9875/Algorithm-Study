@@ -1,113 +1,79 @@
 #include <iostream>
-#include <string>
-#include <cmath>
+#include <queue>
+#include <cstring>
 using namespace std;
 
-int n, m;
-string arr[10];
-bool result = 0;
-int y_ar[4] = { 0,1,0,-1 };
-int x_ar[4] = { -1,0,1,0 };
+int n = 0, result = 0;
+int arr[20][20] = { 0, };
+int visited[20][20] = { 0, };
+int y_ar[4] = { 0,0,1,-1 };
+int x_ar[4] = { 1,-1,0,0 };
 
-void dfs(int cnt, int ry, int rx, int by, int bx) {
-	if (cnt == 10)
-		return;
-	if (result)
-		return;
-
-	for (int i = 0; i < 4; i++) {
-
-		int nry = ry, nrx = rx;
-		int nby = by, nbx = bx;
-		bool blue = false, red = false;
-		while (1) {
-
-			if (arr[nry + y_ar[i]][nrx + x_ar[i]] == '.') {
-				nry += y_ar[i];
-				nrx += x_ar[i];
-			}
-			else if (arr[nry + y_ar[i]][nrx + x_ar[i]] == 'O') {
-				nry += y_ar[i];
-				nrx += x_ar[i];
-				red = true;
-				break;
-			}
-			else if (arr[nry + y_ar[i]][nrx + x_ar[i]] == '#') {
-				break;
-			}
-		}
-
-		while (1) {
-			if (arr[nby + y_ar[i]][nbx + x_ar[i]] == '.') {
-				nby += y_ar[i];
-				nbx += x_ar[i];
-			}
-			else if (arr[nby + y_ar[i]][nbx + x_ar[i]] == 'O') {
-				nby += y_ar[i];
-				nbx += x_ar[i];
-				blue = true;
-				break;
-			}
-			else if (arr[nby + y_ar[i]][nbx + x_ar[i]] == '#') {
-				break;
-			}
-		}
-
-		if (blue == true)
-			continue;
-		if (red == true) {
-			result = true;
-			return;
-		}
-
-		if (nrx == nbx && nry == nby) {			//포개진 경우
-			if (i == 0) {
-				if (rx > bx) 	nrx += 1;	//빨간공이 밑에 있었던 경우
-				else			nbx += 1;
-			}
-			else if (i == 1) {
-				if (ry > by)	nby -= 1;		//파란공이 더 왼쪽에서 시작한 경우
-				else			nry -= 1;
-			}
-			else if (i == 2) {
-				if (rx > bx)		nbx -= 1;		//파란공이 더 위에서 시작
-				else				nrx -= 1;
-			}
-			else if (i == 3) {
-				if (ry > by)		nry += 1;		//빨간공이 더 오른쪽에서 시작
-				else				nby += 1;
-			}
-		}
-
-		dfs(cnt + 1, nry, nrx, nby, nbx);
-
-
-
-
-	}
-
-}
 int main() {
-	ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
-	cin >> n >> m;
+	ios_base::sync_with_stdio(0);
+	cin.tie(0), cout.tie(0);
 
-	int ry, rx, by, bx;
-	for (int i = 0; i < n; i++) {
-		cin >> arr[i];
-		for (int j = 0; j < m; j++) {
-			if (arr[i][j] == 'R') {
-				ry = i, rx = j;
-				arr[i][j] = '.';
-			}
-			else if(arr[i][j] == 'B') {
-				by = i, bx = j;
-				arr[i][j] = '.';
+	cin >> n;
+	int sy, sx;
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++) {
+			cin >> arr[i][j];
+			if (arr[i][j] == 9)
+				arr[i][j] = 0, sy = i, sx = j;
+		}
+
+	int shark = 2;
+	int exp = 0;
+	while (1) {
+		memset(visited, 0, sizeof(visited));
+		
+		//1. 이동거리 측정
+
+		queue <pair<int, int >> que;
+		que.push(make_pair(sy, sx));
+		visited[sy][sx] = 1;
+		while (!que.empty()) {
+			int cy = que.front().first;
+			int cx = que.front().second;
+			que.pop();
+
+			for (int i = 0; i < 4; i++) {
+				int ny = cy + y_ar[i];
+				int nx = cx + x_ar[i];
+
+				if (ny >= 0 && ny < n && nx >= 0 && nx < n && visited[ny][nx] == 0) {
+					if (arr[ny][nx] <= shark ) {
+						visited[ny][nx] = visited[cy][cx] + 1;
+						que.push(make_pair(ny, nx));
+					}
+				}
 			}
 		}
+
+		//2. 물고기 취식
+		
+		bool chk = false;
+		int mmy=-1, mmx=-1;
+		int mined = (int)2e9;
+		for(int i=0;i<n; i++)
+			for (int j = 0; j < n; j++)
+				if (visited[i][j] != 0 && visited[i][j] < mined && arr[i][j] != 0 && shark > arr[i][j]) {
+					chk = true;
+					mined = visited[i][j];
+					mmy = i, mmx = j;
+				}
+
+		
+		exp++;
+		if (exp == shark)
+			shark++, exp = 0;
+		arr[mmy][mmx] = 0;
+		if (chk == false)
+			break;
+		result += visited[mmy][mmx] - 1;
+		sy = mmy, sx = mmx;
+		
 	}
-
-	dfs(0, ry, rx, by, bx);
 	cout << result << endl;
-
 	return 0;
 }
